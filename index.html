@@ -48,112 +48,23 @@
 
         .painel-impressao { background: #e0f2fe; border: 1px solid #0284c7; border-radius: 8px; padding: 15px; margin-top: 20px; text-align: center; }
 
-        /* --- IMPRESSÃO DE ETIQUETAS A4 --- */
-        #folhaA4 {
-            display: none;
-            width: 21cm;
-            min-height: 29.7cm;
-            padding: 1cm 0.6cm;
-            background: white;
-            margin: 20px auto;
-            border: 1px solid #ccc;
-        }
-
-        .grid-a4 {
-            display: grid;
-            grid-template-columns: repeat(3, 6.7cm);
-            grid-auto-rows: 3.9cm;
-            gap: 0.3cm;
-            justify-content: center;
-        }
-
-        .etiqueta-box {
-            width: 6.7cm;
-            height: 3.9cm;
-            border: 1px dashed #000;
-            padding: 6px;
-            background: white;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
+        /* IMPRESSÃO A4 ETIQUETAS */
+        #folhaA4 { display: none; width: 21cm; min-height: 29.7cm; padding: 1cm 0.6cm; background: white; margin: 20px auto; border: 1px solid #ccc; }
+        .grid-a4 { display: grid; grid-template-columns: repeat(3, 6.7cm); grid-auto-rows: 3.9cm; gap: 0.3cm; justify-content: center; }
+        .etiqueta-box { width: 6.7cm; height: 3.9cm; border: 1px dashed #000; padding: 6px; background: white; display: flex; flex-direction: row; align-items: center; justify-content: space-between; box-sizing: border-box; overflow: hidden; }
         .etiqueta-info { text-align: left; font-size: 8.5px; line-height: 1.25; font-weight: bold; width: 62%; }
         .etiqueta-info h3 { font-size: 10.5px; margin-bottom: 3px; border-bottom: 1px solid #000; text-align: center; padding-bottom: 2px; }
         .qr-box { width: 36%; display: flex; justify-content: center; align-items: center; }
 
-        /* --- FICHA DE MISTURA IMPRESSÃO --- */
-        #folhaFichaMistura {
-            display: none;
-            width: 21cm;
-            background: white;
-            padding: 1cm;
-            margin: 20px auto;
-            border: 1px solid #000;
-            font-family: Arial, sans-serif;
-        }
-
-        .tabela-ficha {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 5px;
-        }
-
-        .tabela-ficha th, .tabela-ficha td {
-            border: 1px solid #000;
-            padding: 6px;
-            text-align: center;
-            font-size: 12px;
-        }
-
-        .tabela-ficha th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-
-        .cabecalho-ficha {
-            background-color: #a4c2f4;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-            padding: 8px;
-            border: 1px solid #000;
-            margin-bottom: -1px;
-        }
-
-        .linha-info-ficha {
-            display: flex;
-            justify-content: space-between;
-            border: 1px solid #000;
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: bold;
-            background: #fff;
-        }
-
-        .rodape-ficha {
-            border: 1px solid #000;
-            border-top: none;
-            padding: 8px 10px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .box-check {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 1px solid #000;
-            vertical-align: middle;
-            text-align: center;
-            line-height: 14px;
-            font-size: 11px;
-            margin-left: 4px;
-            margin-right: 15px;
-        }
+        /* IMPRESSÃO FICHA DE MISTURA */
+        #folhaFichaMistura { display: none; width: 21cm; background: white; padding: 1cm; margin: 20px auto; border: 1px solid #000; font-family: Arial, sans-serif; }
+        .tabela-ficha { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .tabela-ficha th, .tabela-ficha td { border: 1px solid #000; padding: 6px; text-align: center; font-size: 12px; }
+        .tabela-ficha th { background-color: #f2f2f2; font-weight: bold; }
+        .cabecalho-ficha { background-color: #a4c2f4; text-align: center; font-weight: bold; font-size: 14px; padding: 8px; border: 1px solid #000; margin-bottom: -1px; }
+        .linha-info-ficha { display: flex; justify-content: space-between; border: 1px solid #000; padding: 6px 10px; font-size: 12px; font-weight: bold; background: #fff; }
+        .rodape-ficha { border: 1px solid #000; border-top: none; padding: 8px 10px; font-size: 12px; font-weight: bold; }
+        .box-check { display: inline-block; width: 16px; height: 16px; border: 1px solid #000; vertical-align: middle; text-align: center; line-height: 14px; font-size: 11px; margin-left: 4px; margin-right: 15px; }
 
         @media print {
             @page { size: A4 portrait; margin: 8mm 5mm; }
@@ -180,14 +91,8 @@
     <div id="tab-entrada" class="tab-content active">
         <form id="formEntrada">
             <div class="form-grid">
-                <div class="form-group">
-                    <label>BAG Nº (Automático)</label>
-                    <input type="text" id="bagNo" readonly value="Carregando...">
-                </div>
-                <div class="form-group">
-                    <label>Data de Entrada</label>
-                    <input type="text" id="dataEntrada" readonly>
-                </div>
+                <div class="form-group"><label>BAG Nº (Automático)</label><input type="text" id="bagNo" readonly value="Carregando..."></div>
+                <div class="form-group"><label>Data de Entrada</label><input type="text" id="dataEntrada" readonly></div>
                 <div class="form-group">
                     <label>Cor</label>
                     <select id="corSelect" onchange="toggleOutro('corSelect', 'corOutro')" required>
@@ -219,10 +124,7 @@
                     </select>
                     <input type="text" id="tipoOutro" placeholder="Digite a matéria-prima" style="display:none; margin-top:5px;">
                 </div>
-                <div class="form-group">
-                    <label>Peso (KG)</label>
-                    <input type="number" step="0.01" id="peso" required placeholder="0.00">
-                </div>
+                <div class="form-group"><label>Peso (KG)</label><input type="number" step="0.01" id="peso" required placeholder="0.00"></div>
                 <div class="form-group">
                     <label>Mão de Obra</label>
                     <select id="maoDeObra" required>
@@ -232,10 +134,7 @@
                         <option value="Tatu">Tatu</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Fornecedor</label>
-                    <input type="text" id="fornecedor" required placeholder="Nome do fornecedor">
-                </div>
+                <div class="form-group"><label>Fornecedor</label><input type="text" id="fornecedor" required placeholder="Nome do fornecedor"></div>
             </div>
             <button type="submit" class="btn">Lançar Entrada e Adicionar à Fila</button>
         </form>
@@ -248,9 +147,7 @@
             <button id="btnImprimirForcado" class="btn btn-secondary" style="display:none; margin-top:5px;" onclick="imprimirFolhaA4()">Imprimir Folha Incompleta Mesmo Assim</button>
         </div>
 
-        <div id="folhaA4">
-            <div class="grid-a4" id="gridEtiquetaConteudo"></div>
-        </div>
+        <div id="folhaA4"><div class="grid-a4" id="gridEtiquetaConteudo"></div></div>
     </div>
 
     <!-- ABA 2: MISTURA -->
@@ -259,10 +156,7 @@
 
         <form id="formMistura">
             <div class="form-grid">
-                <div class="form-group">
-                    <label>Nº Controle / Lote (Automático)</label>
-                    <input type="text" id="noControle" readonly value="Carregando...">
-                </div>
+                <div class="form-group"><label>Nº Controle / Lote (Automático)</label><input type="text" id="noControle" readonly value="Carregando..."></div>
                 <div class="form-group"><label>Data da Mistura</label><input type="text" id="dataMistura" readonly></div>
                 <div class="form-group"><label>Cor Final da Mistura</label><input type="text" id="corMistura" required placeholder="Ex: Preto"></div>
             </div>
@@ -274,7 +168,7 @@
                 </thead>
                 <tbody id="bodyBags">
                     <tr>
-                        <td><input type="text" name="bag_no[]" list="listaBagsData" onchange="buscarQuantidadeDoBag(this)" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
+                        <td><input type="text" name="bag_no[]" list="listaBagsData" oninput="buscarQuantidadeDoBag(this)" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
                         <td><input type="number" step="0.01" name="bag_qtd[]" class="qtd-bag" oninput="calcularSomaTotal()" required style="width:100%" placeholder="0.00"></td>
                         <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
                     </tr>
@@ -330,9 +224,7 @@
                         <th style="width: 20%;">QNTDD (KG)</th>
                     </tr>
                 </thead>
-                <tbody id="printBodyMistura">
-                    <!-- Preenchido dinamicamente pelo JavaScript -->
-                </tbody>
+                <tbody id="printBodyMistura"></tbody>
             </table>
 
             <div class="rodape-ficha">
@@ -352,43 +244,67 @@
 </div>
 
 <script>
-    // ⚠️ ATENÇÃO: SUBSTITUA COM A SUA URL DO GOOGLE APPS SCRIPT
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzulo3mmO9A_JS0R_zws7B8mX3kID-OI0sXfAJ5i2UFM84arxw6MOs4kA0baTYrZvU/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw23yYLYdtqFeKC30EsQDvEcDMPP2lFwFAuctlz9PbviptzYK56J_5YxQnosqDZyQ/exec";
     let filaEtiquetas = [];
+    let cacheBags = {}; // Armazena dados localmente para ficar ultra rápido
 
     document.addEventListener("DOMContentLoaded", function() {
         const dataHoje = new Date().toLocaleDateString('pt-BR');
         document.getElementById('dataEntrada').value = dataHoje;
         document.getElementById('dataMistura').value = dataHoje;
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const bagUrl = urlParams.get('bag');
-        
-        if(bagUrl) {
-            switchTab('mistura');
-            const primeiroInput = document.querySelector('input[name="bag_no[]"]');
-            primeiroInput.value = bagUrl;
-            buscarQuantidadeDoBag(primeiroInput);
-        } else {
-            buscarProximosSequenciais();
-        }
+        carregarDadosEmCache();
     });
 
+    // ⚡ Carrega tudo de uma vez para ficar super rápido
+    function carregarDadosEmCache() {
+        fetch(APPS_SCRIPT_URL)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('bagNo').value = data.proximoBag;
+            document.getElementById('noControle').value = data.proximoLote;
+            
+            const datalist = document.getElementById('listaBagsData');
+            datalist.innerHTML = '';
+            
+            if (data.detalhesBags) {
+                cacheBags = data.detalhesBags;
+                Object.keys(cacheBags).forEach(bagCode => {
+                    const info = cacheBags[bagCode];
+                    if (info.saldoAtual > 0) { // Mostra na lista apenas BAGs com saldo
+                        const option = document.createElement('option');
+                        option.value = bagCode;
+                        option.textContent = `${bagCode} (${info.saldoAtual} KG restantes)`;
+                        datalist.appendChild(option);
+                    }
+                });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const bagUrl = urlParams.get('bag');
+            if(bagUrl) {
+                switchTab('mistura');
+                const primeiroInput = document.querySelector('input[name="bag_no[]"]');
+                primeiroInput.value = bagUrl;
+                buscarQuantidadeDoBag(primeiroInput);
+            }
+        });
+    }
+
+    // ⚡ Busca Instantânea no Cache Local
     function buscarQuantidadeDoBag(inputBag) {
         let codigoBag = inputBag.value.trim().split(' ')[0];
         if(!codigoBag) return;
 
         inputBag.value = codigoBag;
-
         const row = inputBag.closest('tr');
         const inputQtd = row.querySelector('.qtd-bag');
+        const alerta = document.getElementById('alertaBagJaBaixado');
 
-        fetch(`${APPS_SCRIPT_URL}?verificarBag=${encodeURIComponent(codigoBag)}`)
-        .then(res => res.json())
-        .then(data => {
-            const alerta = document.getElementById('alertaBagJaBaixado');
+        const bagInfo = cacheBags[codigoBag];
 
-            if (data.zerado) {
+        if (bagInfo) {
+            if (bagInfo.saldoAtual <= 0) {
                 alerta.style.display = 'block';
                 alerta.innerHTML = `⚠️ ATENÇÃO: O ${codigoBag} JÁ FOI TOTALMENTE CONSUMIDO (SALDO 0 KG)!<br>Escolha outro BAG disponível.`;
                 document.getElementById('btnSalvarMistura').disabled = true;
@@ -399,43 +315,21 @@
                 document.getElementById('btnSalvarMistura').disabled = false;
                 document.getElementById('btnSalvarMistura').style.backgroundColor = '#1e3a8a';
 
-                if (data.encontrado && data.saldoAtual !== undefined) {
-                    inputQtd.value = data.saldoAtual;
-                    inputQtd.max = data.saldoAtual;
-                    row.setAttribute('data-cor', data.cor || '');
-                    row.setAttribute('data-tipo', data.tipo || '');
-                    calcularSomaTotal();
-                }
+                // Preenche o saldo RESTANTE correto
+                inputQtd.value = bagInfo.saldoAtual;
+                inputQtd.max = bagInfo.saldoAtual;
+                row.setAttribute('data-cor', bagInfo.cor || '');
+                row.setAttribute('data-tipo', bagInfo.tipo || '');
+                calcularSomaTotal();
             }
-        });
-    }
-
-    function buscarProximosSequenciais() {
-        fetch(APPS_SCRIPT_URL)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('bagNo').value = data.proximoBag;
-            document.getElementById('noControle').value = data.proximoLote;
-            
-            const datalist = document.getElementById('listaBagsData');
-            datalist.innerHTML = '';
-            if (data.listaBags) {
-                data.listaBags.forEach(bag => {
-                    const option = document.createElement('option');
-                    option.value = bag;
-                    datalist.appendChild(option);
-                });
-            }
-        });
+        }
     }
 
     function calcularSomaTotal() {
         let total = 0;
         document.querySelectorAll('.qtd-bag').forEach(input => {
             const valor = parseFloat(input.value);
-            if (!isNaN(valor)) {
-                total += valor;
-            }
+            if (!isNaN(valor)) total += valor;
         });
         document.getElementById('qtdFinalKg').value = total.toFixed(2);
     }
@@ -468,7 +362,7 @@
         const tbody = document.getElementById('bodyBags');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" name="bag_no[]" list="listaBagsData" onchange="buscarQuantidadeDoBag(this)" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
+            <td><input type="text" name="bag_no[]" list="listaBagsData" oninput="buscarQuantidadeDoBag(this)" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
             <td><input type="number" step="0.01" name="bag_qtd[]" class="qtd-bag" oninput="calcularSomaTotal()" required style="width:100%" placeholder="0.00"></td>
             <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
         `;
@@ -487,10 +381,8 @@
         const bagNo = document.getElementById('bagNo').value;
         const corSelect = document.getElementById('corSelect').value;
         const cor = corSelect === 'Outras' ? document.getElementById('corOutro').value : corSelect;
-        
         const tipoSelect = document.getElementById('tipoSelect').value;
         const tipo = tipoSelect === 'Outra' ? document.getElementById('tipoOutro').value : tipoSelect;
-
         const peso = document.getElementById('peso').value;
         const maoDeObra = document.getElementById('maoDeObra').value;
         const fornecedor = document.getElementById('fornecedor').value;
@@ -498,34 +390,26 @@
 
         const payload = {
             tipoAcao: 'ENTRADA_MATERIA_PRIMA',
-            bagNo: bagNo,
-            cor: cor,
-            tipo: tipo,
-            peso: peso,
-            maoDeObra: maoDeObra,
-            fornecedor: fornecedor
+            bagNo: bagNo, cor: cor, tipo: tipo, peso: peso, maoDeObra: maoDeObra, fornecedor: fornecedor
         };
 
         fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
+            method: 'POST', mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
             filaEtiquetas.push({ bagNo, cor, tipo, peso, maoDeObra, dataEntrada });
             atualizarFilaImpressao();
-            alert(`BAG ${bagNo} gravado! Fila atual: ${filaEtiquetas.length}/18 etiquetas.`);
-            
+            alert(`BAG ${bagNo} gravado!`);
             document.getElementById('peso').value = '';
             document.getElementById('fornecedor').value = '';
-            buscarProximosSequenciais();
+            carregarDadosEmCache();
         });
     });
 
     function atualizarFilaImpressao() {
         const qtd = filaEtiquetas.length;
         document.getElementById('qtdFila').innerText = qtd;
-
         if (qtd > 0) document.getElementById('btnImprimirForcado').style.display = 'inline-block';
         if (qtd >= 18) document.getElementById('btnImprimirA4').style.display = 'inline-block';
     }
@@ -555,9 +439,7 @@
             grid.appendChild(box);
 
             new QRCode(document.getElementById(idQr), {
-                text: `${currentUrl}?bag=${item.bagNo}`,
-                width: 60,
-                height: 60
+                text: `${currentUrl}?bag=${item.bagNo}`, width: 60, height: 60
             });
         });
 
@@ -613,14 +495,15 @@
             componentes: bags
         };
 
+        // Dispara a gravação no Google Sheets
         fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
+            method: 'POST', mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-        }).then(() => {
-            gerarEImprimirFicha(dataMistura, corMistura, noControle, linhasTabelaPrint, qtdFinalKg, foiProducao, caixaProduzida);
         });
+
+        // Imprime a ficha sem travar a tela
+        gerarEImprimirFicha(dataMistura, corMistura, noControle, linhasTabelaPrint, qtdFinalKg, foiProducao, caixaProduzida);
     });
 
     function gerarEImprimirFicha(data, cor, noControle, componentes, totalKg, foiProducao, caixa) {
@@ -631,7 +514,7 @@
         const printBody = document.getElementById('printBodyMistura');
         printBody.innerHTML = '';
 
-        const totalLinhas = Math.max(componentes.length, 10); // Mantém pelo menos 10 linhas visíveis igual à folha física
+        const totalLinhas = Math.max(componentes.length, 10);
 
         for (let i = 0; i < totalLinhas; i++) {
             const item = componentes[i] || { bagNo: '', cor: '', tipo: '', qtdKg: '' };
@@ -676,13 +559,13 @@
             
             document.getElementById('bodyBags').innerHTML = `
                 <tr>
-                    <td><input type="text" name="bag_no[]" list="listaBagsData" onchange="buscarQuantidadeDoBag(this)" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
+                    <td><input type="text" name="bag_no[]" list="listaBagsData" oninput="buscarQuantidadeDoBag(this)" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
                     <td><input type="number" step="0.01" name="bag_qtd[]" class="qtd-bag" oninput="calcularSomaTotal()" required style="width:100%" placeholder="0.00"></td>
                     <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
                 </tr>
             `;
             document.getElementById('qtdFinalKg').value = '';
-            buscarProximosSequenciais();
+            carregarDadosEmCache();
         }, 500);
     }
 </script>
