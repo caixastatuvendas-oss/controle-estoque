@@ -37,12 +37,12 @@
 
         .painel-impressao { background: #e0f2fe; border: 1px solid #0284c7; border-radius: 8px; padding: 15px; margin-top: 20px; text-align: center; }
 
-        /* CONFIGURAÇÃO DA FOLHA A4 PARA IMPRESSÃO DE ETIQUETAS 7x4 cm */
+        /* CONFIGURAÇÃO DA FOLHA A4 PARA TELA E PRÉ-VISUALIZAÇÃO */
         #folhaA4 {
             display: none;
             width: 21cm;
             min-height: 29.7cm;
-            padding: 0.5cm;
+            padding: 1cm 0.6cm; /* Margem interna para evitar corte */
             background: white;
             margin: 20px auto;
             border: 1px solid #ccc;
@@ -50,17 +50,17 @@
 
         .grid-a4 {
             display: grid;
-            grid-template-columns: repeat(3, 7cm);
-            grid-auto-rows: 4cm;
-            gap: 0.2cm;
+            grid-template-columns: repeat(3, 6.7cm); /* Reduzido ligeiramente de 7cm para 6.7cm para caber nas margens */
+            grid-auto-rows: 3.9cm;
+            gap: 0.3cm;
             justify-content: center;
         }
 
         .etiqueta-box {
-            width: 7cm;
-            height: 4cm;
+            width: 6.7cm;
+            height: 3.9cm;
             border: 1px dashed #000;
-            padding: 4px;
+            padding: 6px; /* Aumentada a margem interna da etiqueta */
             background: white;
             display: flex;
             flex-direction: row;
@@ -70,17 +70,29 @@
             overflow: hidden;
         }
 
-        .etiqueta-info { text-align: left; font-size: 9px; line-height: 1.2; font-weight: bold; width: 62%; }
-        .etiqueta-info h3 { font-size: 11px; margin-bottom: 2px; border-bottom: 1px solid #000; text-align: center; }
+        .etiqueta-info { text-align: left; font-size: 8.5px; line-height: 1.25; font-weight: bold; width: 62%; }
+        .etiqueta-info h3 { font-size: 10.5px; margin-bottom: 3px; border-bottom: 1px solid #000; text-align: center; padding-bottom: 2px; }
         .qr-box { width: 36%; display: flex; justify-content: center; align-items: center; }
 
+        /* AJUSTES EXCLUSIVOS DE IMPRESSÃO (COM MARGENS DE SEGURANÇA) */
         @media print {
-            @page { size: A4 portrait; margin: 0; }
+            @page { 
+                size: A4 portrait; 
+                margin: 8mm 5mm; /* Adicionada margem real de impressão para evitar que a impressora corte as bordas */
+            }
             body { background: white; padding: 0; margin: 0; }
             body * { visibility: hidden; }
             #folhaA4, #folhaA4 * { visibility: visible; }
-            #folhaA4 { position: absolute; left: 0; top: 0; width: 21cm; border: none; padding: 0.8cm 0.4cm; }
-            .etiqueta-box { border: 0.5px solid #ccc; }
+            #folhaA4 { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                border: none; 
+                padding: 0; 
+                margin: 0;
+            }
+            .etiqueta-box { border: 0.5px solid #bbb; }
         }
     </style>
 </head>
@@ -218,7 +230,7 @@
 
 <script>
     // ⚠️ SUBSTITUA COM A SUA URL DO APPS SCRIPT
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAIBpjOUi_OjcqRHlhhSB5lk8JwIWa5eJa0R29o8-CzBeyR4KUglzOwrQZpFANIQU/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPF0CImqfj3AGFVK15p4iaq508fbSn6jkFYLBz0oOOU0o2MVjL7LwWOzH5E3Mo_4/exec";
     let filaEtiquetas = [];
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -387,8 +399,8 @@
 
             new QRCode(document.getElementById(idQr), {
                 text: `${currentUrl}?bag=${item.bagNo}`,
-                width: 65,
-                height: 65
+                width: 60, // Reduzido ligeiramente para caber melhor na margem
+                height: 60
             });
         });
 
