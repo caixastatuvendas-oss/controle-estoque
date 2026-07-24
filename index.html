@@ -34,34 +34,37 @@
         .btn { background-color: var(--primary); color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-secondary { background-color: #475569; }
 
-        /* Estilo para a Etiqueta 4cm x 7cm */
+        /* IMPRESSÃO DA ETIQUETA */
         #etiquetaArea { display: none; margin-top: 25px; text-align: center; }
+        
         .etiqueta-box {
             width: 7cm;
             height: 4cm;
-            border: 2px dashed #000;
+            border: 2px solid #000;
             padding: 5px;
-            margin: 0 auto;
+            margin: 10px auto;
             background: white;
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
-            box-sizing: border-border-box;
+            box-sizing: border-box;
+            page-break-inside: avoid;
         }
-        .etiqueta-info { text-align: left; font-size: 10px; line-height: 1.2; font-weight: bold; }
-        .etiqueta-info h3 { font-size: 12px; margin-bottom: 3px; border-bottom: 1px solid #000; }
-        #qrcode { padding: 2px; }
 
-        /* Regra de Impressão (Imprime apenas a etiqueta) */
+        .etiqueta-info { text-align: left; font-size: 10px; line-height: 1.25; font-weight: bold; width: 60%; }
+        .etiqueta-info h3 { font-size: 12px; margin-bottom: 3px; border-bottom: 1px solid #000; text-align: center; }
+        #qrcode { width: 38%; display: flex; justify-content: center; align-items: center; }
+
         @media print {
+            @page { size: A4 portrait; margin: 1cm; }
+            body { background: white; padding: 0; }
             body * { visibility: hidden; }
             #etiquetaArea, #etiquetaArea * { visibility: visible; }
-            #etiquetaArea { position: absolute; left: 0; top: 0; width: 7cm; height: 4cm; margin: 0; }
-            .btn-print { display: none; }
+            #etiquetaArea { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+            .etiqueta-container-a4 { display: grid; grid-template-columns: repeat(2, 7cm); gap: 0.5cm; justify-content: start; }
+            .btn-print { display: none !important; }
         }
-
-        .toast { display: none; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center; font-weight: bold; background: #dcfce7; color: #15803d; }
     </style>
 </head>
 <body>
@@ -127,8 +130,9 @@
                     <label>Mão de Obra</label>
                     <select id="maoDeObra" required>
                         <option value="">Selecione...</option>
-                        <option value="Tatu">Tatu</option>
+                        <option value="Não">Não</option>
                         <option value="Jesus">Jesus</option>
+                        <option value="Tatu">Tatu</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -139,22 +143,24 @@
             <button type="submit" class="btn">Lançar e Gerar Etiqueta</button>
         </form>
 
-        <!-- ÁREA DA ETIQUETA 4x7 CM -->
+        <!-- ETIQUETA A4 -->
         <div id="etiquetaArea">
-            <div class="etiqueta-box" id="etiquetaConteudo">
-                <div class="etiqueta-info">
-                    <h3>CAIXAS TATU</h3>
-                    <p><b>BAG:</b> <span id="lblBag"></span></p>
-                    <p><b>DATA:</b> <span id="lblData"></span></p>
-                    <p><b>COR:</b> <span id="lblCor"></span></p>
-                    <p><b>TIPO:</b> <span id="lblTipo"></span></p>
-                    <p><b>PESO:</b> <span id="lblPeso"></span> KG</p>
-                    <p><b>OP:</b> <span id="lblOp"></span></p>
+            <div class="etiqueta-container-a4">
+                <div class="etiqueta-box" id="etiquetaConteudo">
+                    <div class="etiqueta-info">
+                        <h3>CAIXAS TATU</h3>
+                        <p><b>BAG:</b> <span id="lblBag"></span></p>
+                        <p><b>DATA:</b> <span id="lblData"></span></p>
+                        <p><b>COR:</b> <span id="lblCor"></span></p>
+                        <p><b>TIPO:</b> <span id="lblTipo"></span></p>
+                        <p><b>PESO:</b> <span id="lblPeso"></span> KG</p>
+                        <p><b>MO:</b> <span id="lblOp"></span></p>
+                    </div>
+                    <div id="qrcode"></div>
                 </div>
-                <div id="qrcode"></div>
             </div>
             <br>
-            <button class="btn btn-secondary btn-print" onclick="window.print()">🖨️ Imprimir Etiqueta (4x7 cm)</button>
+            <button class="btn btn-secondary btn-print" onclick="window.print()">🖨️ Imprimir em Folha A4 (4x7 cm)</button>
         </div>
     </div>
 
@@ -162,7 +168,10 @@
     <div id="tab-mistura" class="tab-content">
         <form id="formMistura">
             <div class="form-grid">
-                <div class="form-group"><label>Nº Controle / Lote</label><input type="text" id="noControle" required placeholder="Ex: 1970"></div>
+                <div class="form-group">
+                    <label>Nº Controle / Lote (Automático)</label>
+                    <input type="text" id="noControle" readonly value="Carregando...">
+                </div>
                 <div class="form-group"><label>Data da Mistura</label><input type="text" id="dataMistura" readonly></div>
                 <div class="form-group"><label>Cor Final da Mistura</label><input type="text" id="corMistura" required placeholder="Ex: Preto"></div>
             </div>
@@ -192,20 +201,16 @@
             <button type="submit" class="btn">Salvar Ficha de Mistura</button>
         </form>
     </div>
-
-    <div id="toastMessage" class="toast"></div>
 </div>
 
 <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8iO_VEuNEa6K3lacZEIxEdV26vCbMyR9HbWS5cEq_zJhyQoATtULx5cP7JxyM2n4/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2IId48sarjmmHbupxuTzg2gWAn_U5EJDymwK2CoBfwb9k6oOq9Ln7YfRQTW0LFC8/exec";
 
-    // Inicialização
     document.addEventListener("DOMContentLoaded", function() {
         const dataHoje = new Date().toLocaleDateString('pt-BR');
         document.getElementById('dataEntrada').value = dataHoje;
         document.getElementById('dataMistura').value = dataHoje;
-        
-        // Verifica se veio algum BAG via QR Code na URL
+
         const urlParams = new URLSearchParams(window.location.search);
         const bagUrl = urlParams.get('bag');
         if(bagUrl) {
@@ -213,17 +218,19 @@
             document.querySelector('input[name="bag_no[]"]').value = bagUrl;
         }
 
-        buscarProximoBag();
+        buscarProximosSequenciais();
     });
 
-    function buscarProximoBag() {
+    function buscarProximosSequenciais() {
         fetch(APPS_SCRIPT_URL)
         .then(res => res.json())
         .then(data => {
             document.getElementById('bagNo').value = data.proximoBag;
+            document.getElementById('noControle').value = data.proximoLote;
         })
         .catch(err => {
             document.getElementById('bagNo').value = "BAG-0001";
+            document.getElementById('noControle').value = "LOTE-1000";
         });
     }
 
@@ -262,7 +269,6 @@
         tbody.appendChild(tr);
     }
 
-    // Processar formulário de Entrada + Gerar Etiqueta com QR Code
     document.getElementById('formEntrada').addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -294,7 +300,6 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            // Atualiza campos da Etiqueta
             document.getElementById('lblBag').innerText = bagNo;
             document.getElementById('lblData').innerText = dataEntrada;
             document.getElementById('lblCor').innerText = cor;
@@ -302,26 +307,22 @@
             document.getElementById('lblPeso').innerText = peso;
             document.getElementById('lblOp').innerText = maoDeObra;
 
-            // Gerar QR Code apontando para o próprio link com o parâmetro do BAG
             document.getElementById('qrcode').innerHTML = "";
             const currentUrl = window.location.href.split('?')[0];
             const qrCodeUrl = `${currentUrl}?bag=${bagNo}`;
 
             new QRCode(document.getElementById("qrcode"), {
                 text: qrCodeUrl,
-                width: 90,
-                height: 90
+                width: 80,
+                height: 80
             });
 
             document.getElementById('etiquetaArea').style.display = 'block';
-            alert("Lançamento salvo com sucesso! Imprima a etiqueta abaixo.");
-            
-            // Recarrega o próximo número BAG para o próximo uso
-            buscarProximoBag();
+            alert("Entrada gravada no Sheets! Clique no botão abaixo para imprimir a etiqueta A4.");
+            buscarProximosSequenciais();
         });
     });
 
-    // Form Mistura
     document.getElementById('formMistura').addEventListener('submit', function(e) {
         e.preventDefault();
         const bags = [];
@@ -348,6 +349,7 @@
         }).then(() => {
             alert("Ficha de Mistura salva no Google Sheets!");
             document.getElementById('formMistura').reset();
+            buscarProximosSequenciais();
         });
     });
 </script>
