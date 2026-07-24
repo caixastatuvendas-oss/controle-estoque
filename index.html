@@ -34,7 +34,6 @@
         .btn-success { background-color: #16a34a; }
         .btn-secondary { background-color: #475569; }
 
-        /* AVISO DE BAG JÁ BAIXADO */
         .alerta-erro {
             background-color: #f87171;
             color: white;
@@ -186,7 +185,6 @@
 
     <!-- ABA 2: MISTURA -->
     <div id="tab-mistura" class="tab-content">
-        <!-- BANNER DE ERRO SE ESCANEAR BAG JÁ USADO -->
         <div id="alertaBagJaBaixado" class="alerta-erro"></div>
 
         <form id="formMistura">
@@ -202,11 +200,11 @@
             <p><b>BAGs Utilizados (Apenas BAGs disponíveis no estoque):</b></p>
             <table id="tabelaBags" style="width:100%; border-collapse:collapse; margin-bottom:10px;">
                 <thead>
-                    <tr style="background:#f8fafc; font-size:12px;"><th>Nº BAG</th><th>QNTDD (KG)</th><th>Remover</th></tr>
+                    <tr style="background:#f8fafc; font-size:12px;"><th>Nº BAG</th><th>QNTDD (KG) [Ajustável]</th><th>Remover</th></tr>
                 </thead>
                 <tbody id="bodyBags">
                     <tr>
-                        <td><input type="text" name="bag_no[]" list="listaBagsData" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
+                        <td><input type="text" name="bag_no[]" list="listaBagsData" onchange="buscarQuantidadeDoBag(this)" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
                         <td><input type="number" step="0.01" name="bag_qtd[]" class="qtd-bag" oninput="calcularSomaTotal()" required style="width:100%" placeholder="0.00"></td>
                         <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
                     </tr>
@@ -231,7 +229,7 @@
 
 <script>
     // ⚠️ SUBSTITUA COM A SUA URL DO APPS SCRIPT
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyQEnjexooesv706W6M7KGfZgNbY8Vecnv6Xop1kEqLlm3d6OTJBVaRMxroL9ZDaA/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzmrOgNnSm6zYK9Y6L8HQYGEpfJ2jyB8dGXRILgJE81qM893fdViJIjmTAi3g3SWg/exec";
     let filaEtiquetas = [];
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -239,40 +237,47 @@
         document.getElementById('dataEntrada').value = dataHoje;
         document.getElementById('dataMistura').value = dataHoje;
 
-        // VERIFICA SE VEIO VIA LEITURA DE QR CODE (?bag=BAG-XXXX)
         const urlParams = new URLSearchParams(window.location.search);
         const bagUrl = urlParams.get('bag');
         
         if(bagUrl) {
             switchTab('mistura');
-            verificarStatusBagScaneado(bagUrl);
+            const primeiroInput = document.querySelector('input[name="bag_no[]"]');
+            primeiroInput.value = bagUrl;
+            buscarQuantidadeDoBag(primeiroInput);
         } else {
             buscarProximosSequenciais();
         }
     });
 
-    // VERIFICA SE O BAG SCANNEADO JÁ FOI BAIXADO
-    function verificarStatusBagScaneado(codigoBag) {
+    // BUSCA AUTOMÁTICA DA QUANTIDADE AO DIGITAR/ESCONEAR O BAG
+    function buscarQuantidadeDoBag(inputBag) {
+        const codigoBag = inputBag.value.trim();
+        if(!codigoBag) return;
+
+        const row = inputBag.closest('tr');
+        const inputQtd = row.querySelector('.qtd-bag');
+
         fetch(`${APPS_SCRIPT_URL}?verificarBag=${encodeURIComponent(codigoBag)}`)
         .then(res => res.json())
         .then(data => {
+            const alerta = document.getElementById('alertaBagJaBaixado');
+
             if (data.baixado) {
-                // EXIBE MENSAGEM DE ERRO E BLOQUEIA BOTÃO
-                const alerta = document.getElementById('alertaBagJaBaixado');
                 alerta.style.display = 'block';
                 alerta.innerHTML = `⚠️ ATENÇÃO: O ${codigoBag} JÁ RECEBEU BAIXA EM ${data.dataBaixa}!<br>Este BAG não pode ser reutilizado.`;
-                
                 document.getElementById('btnSalvarMistura').disabled = true;
                 document.getElementById('btnSalvarMistura').style.backgroundColor = '#94a3b8';
             } else {
-                // SE TIVER DISPONÍVEL, PREENCHE O FORMULÁRIO
-                document.querySelector('input[name="bag_no[]"]').value = codigoBag;
-                if(data.peso) {
-                    document.querySelector('input[name="bag_qtd[]"]').value = data.peso;
-                    calcularSomaTotal();
+                alerta.style.display = 'none';
+                document.getElementById('btnSalvarMistura').disabled = false;
+                document.getElementById('btnSalvarMistura').style.backgroundColor = '#1e3a8a';
+
+                if (data.encontrado && data.peso) {
+                    inputQtd.value = data.peso; // Preenche a quantidade automaticamente
+                    calcularSomaTotal();        // Atualiza a soma total em KG
                 }
             }
-            buscarProximosSequenciais();
         });
     }
 
@@ -334,7 +339,7 @@
         const tbody = document.getElementById('bodyBags');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" name="bag_no[]" list="listaBagsData" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
+            <td><input type="text" name="bag_no[]" list="listaBagsData" onchange="buscarQuantidadeDoBag(this)" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
             <td><input type="number" step="0.01" name="bag_qtd[]" class="qtd-bag" oninput="calcularSomaTotal()" required style="width:100%" placeholder="0.00"></td>
             <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
         `;
@@ -470,7 +475,7 @@
             
             document.getElementById('bodyBags').innerHTML = `
                 <tr>
-                    <td><input type="text" name="bag_no[]" list="listaBagsData" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
+                    <td><input type="text" name="bag_no[]" list="listaBagsData" onchange="buscarQuantidadeDoBag(this)" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
                     <td><input type="number" step="0.01" name="bag_qtd[]" class="qtd-bag" oninput="calcularSomaTotal()" required style="width:100%" placeholder="0.00"></td>
                     <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
                 </tr>
