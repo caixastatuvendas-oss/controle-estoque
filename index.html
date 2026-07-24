@@ -48,6 +48,7 @@
 
         .painel-impressao { background: #e0f2fe; border: 1px solid #0284c7; border-radius: 8px; padding: 15px; margin-top: 20px; text-align: center; }
 
+        /* --- IMPRESSÃO DE ETIQUETAS A4 --- */
         #folhaA4 {
             display: none;
             width: 21cm;
@@ -84,13 +85,82 @@
         .etiqueta-info h3 { font-size: 10.5px; margin-bottom: 3px; border-bottom: 1px solid #000; text-align: center; padding-bottom: 2px; }
         .qr-box { width: 36%; display: flex; justify-content: center; align-items: center; }
 
+        /* --- FICHA DE MISTURA IMPRESSÃO --- */
+        #folhaFichaMistura {
+            display: none;
+            width: 21cm;
+            background: white;
+            padding: 1cm;
+            margin: 20px auto;
+            border: 1px solid #000;
+            font-family: Arial, sans-serif;
+        }
+
+        .tabela-ficha {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        .tabela-ficha th, .tabela-ficha td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .tabela-ficha th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .cabecalho-ficha {
+            background-color: #a4c2f4;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 8px;
+            border: 1px solid #000;
+            margin-bottom: -1px;
+        }
+
+        .linha-info-ficha {
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #000;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #fff;
+        }
+
+        .rodape-ficha {
+            border: 1px solid #000;
+            border-top: none;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .box-check {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 1px solid #000;
+            vertical-align: middle;
+            text-align: center;
+            line-height: 14px;
+            font-size: 11px;
+            margin-left: 4px;
+            margin-right: 15px;
+        }
+
         @media print {
             @page { size: A4 portrait; margin: 8mm 5mm; }
             body { background: white; padding: 0; margin: 0; }
             body * { visibility: hidden; }
-            #folhaA4, #folhaA4 * { visibility: visible; }
-            #folhaA4 { position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0; margin: 0; }
-            .etiqueta-box { border: 0.5px solid #bbb; }
+            .imprimir-ativo, .imprimir-ativo * { visibility: visible !important; }
+            .imprimir-ativo { position: absolute; left: 0; top: 0; width: 100%; border: none !important; padding: 0 !important; margin: 0 !important; }
         }
     </style>
 </head>
@@ -220,10 +290,64 @@
                     <label>Qtd Total Gerada (KG) - [Soma Automática]</label>
                     <input type="number" step="0.01" id="qtdFinalKg" required placeholder="0.00" readonly style="background-color: #f8fafc; font-weight: bold; color: #1e3a8a;">
                 </div>
+                <div class="form-group">
+                    <label>Mistura foi para produção?</label>
+                    <select id="foiProducao">
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Qual caixa a ser produzida?</label>
+                    <select id="caixaProduzida">
+                        <option value="Tatu 10">Tatu 10</option>
+                        <option value="Tatu 23">Tatu 23</option>
+                        <option value="Outra">Outra</option>
+                    </select>
+                </div>
             </div>
 
-            <button type="submit" id="btnSalvarMistura" class="btn">Salvar Ficha de Mistura</button>
+            <button type="submit" id="btnSalvarMistura" class="btn">Salvar e Imprimir Ficha de Mistura</button>
         </form>
+
+        <!-- LAYOUT DE IMPRESSÃO DA FICHA DE MISTURA -->
+        <div id="folhaFichaMistura">
+            <div class="cabecalho-ficha">CAIXAS TATU - CONTROLE DE SAIDA DE MATERIA PRIMA PRA MISTURA</div>
+            <div class="linha-info-ficha">
+                <span>DATA DA MISTURA: <span id="printDataMistura"></span></span>
+                <span>COR: <span id="printCorMistura"></span></span>
+                <span>Nº CONTROLE: <span id="printNoControle"></span></span>
+            </div>
+            
+            <table class="tabela-ficha">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Nº BAG</th>
+                        <th style="width: 15%;">COR</th>
+                        <th style="width: 15%;">TIPO</th>
+                        <th style="width: 15%;">QNTDD (KG)</th>
+                        <th style="width: 20%;">MISTURA FINAL</th>
+                        <th style="width: 20%;">QNTDD (KG)</th>
+                    </tr>
+                </thead>
+                <tbody id="printBodyMistura">
+                    <!-- Preenchido dinamicamente pelo JavaScript -->
+                </tbody>
+            </table>
+
+            <div class="rodape-ficha">
+                <div style="margin-bottom: 8px;">
+                    Mistura foi para produção: 
+                    Sim <span class="box-check" id="checkSim"></span> 
+                    Não <span class="box-check" id="checkNao"></span>
+                </div>
+                <div>
+                    Qual Caixa a ser produzida: 
+                    Tatu 10 <span class="box-check" id="checkTatu10"></span> 
+                    Tatu 23 <span class="box-check" id="checkTatu23"></span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -250,7 +374,6 @@
         }
     });
 
-    // BUSCA AUTOMÁTICA DO SALDO AO DIGITAR/ESCANEAR O BAG
     function buscarQuantidadeDoBag(inputBag) {
         let codigoBag = inputBag.value.trim().split(' ')[0];
         if(!codigoBag) return;
@@ -279,6 +402,8 @@
                 if (data.encontrado && data.saldoAtual !== undefined) {
                     inputQtd.value = data.saldoAtual;
                     inputQtd.max = data.saldoAtual;
+                    row.setAttribute('data-cor', data.cor || '');
+                    row.setAttribute('data-tipo', data.tipo || '');
                     calcularSomaTotal();
                 }
             }
@@ -406,6 +531,7 @@
     }
 
     function imprimirFolhaA4() {
+        const folha = document.getElementById('folhaA4');
         const grid = document.getElementById('gridEtiquetaConteudo');
         grid.innerHTML = '';
         const currentUrl = window.location.href.split('?')[0];
@@ -435,36 +561,55 @@
             });
         });
 
-        document.getElementById('folhaA4').style.display = 'block';
+        folha.style.display = 'block';
+        folha.classList.add('imprimir-ativo');
 
         setTimeout(() => {
             window.print();
+            folha.classList.remove('imprimir-ativo');
             if (confirm("Deseja limpar a fila de etiquetas impressas?")) {
                 filaEtiquetas = [];
                 atualizarFilaImpressao();
-                document.getElementById('folhaA4').style.display = 'none';
+                folha.style.display = 'none';
                 document.getElementById('btnImprimirA4').style.display = 'none';
                 document.getElementById('btnImprimirForcado').style.display = 'none';
             }
         }, 500);
     }
 
-    // REGISTRO DE MISTURA
+    // REGISTRO E IMPRESSÃO DE MISTURA
     document.getElementById('formMistura').addEventListener('submit', function(e) {
         e.preventDefault();
         const bags = [];
+        const linhasTabelaPrint = [];
+
         document.querySelectorAll('#bodyBags tr').forEach(row => {
             const inputs = row.querySelectorAll('input');
-            if(inputs[0].value) {
-                bags.push({ bagNo: inputs[0].value, qtdKg: inputs[1].value });
+            const bagNo = inputs[0].value;
+            const qtdKg = inputs[1].value;
+            const cor = row.getAttribute('data-cor') || '';
+            const tipo = row.getAttribute('data-tipo') || '';
+
+            if(bagNo) {
+                bags.push({ bagNo, qtdKg, cor, tipo });
+                linhasTabelaPrint.push({ bagNo, cor, tipo, qtdKg });
             }
         });
 
+        const noControle = document.getElementById('noControle').value;
+        const corMistura = document.getElementById('corMistura').value;
+        const qtdFinalKg = document.getElementById('qtdFinalKg').value;
+        const foiProducao = document.getElementById('foiProducao').value;
+        const caixaProduzida = document.getElementById('caixaProduzida').value;
+        const dataMistura = document.getElementById('dataMistura').value;
+
         const payload = {
             tipoAcao: 'FICHA_MISTURA',
-            noControle: document.getElementById('noControle').value,
-            corMistura: document.getElementById('corMistura').value,
-            qtdFinalKg: document.getElementById('qtdFinalKg').value,
+            noControle: noControle,
+            corMistura: corMistura,
+            qtdFinalKg: qtdFinalKg,
+            foiProducao: foiProducao,
+            caixaProduzida: caixaProduzida,
             componentes: bags
         };
 
@@ -474,7 +619,59 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            alert("Ficha de Mistura salva com sucesso!");
+            gerarEImprimirFicha(dataMistura, corMistura, noControle, linhasTabelaPrint, qtdFinalKg, foiProducao, caixaProduzida);
+        });
+    });
+
+    function gerarEImprimirFicha(data, cor, noControle, componentes, totalKg, foiProducao, caixa) {
+        document.getElementById('printDataMistura').innerText = data;
+        document.getElementById('printCorMistura').innerText = cor;
+        document.getElementById('printNoControle').innerText = noControle;
+
+        const printBody = document.getElementById('printBodyMistura');
+        printBody.innerHTML = '';
+
+        const totalLinhas = Math.max(componentes.length, 10); // Mantém pelo menos 10 linhas visíveis igual à folha física
+
+        for (let i = 0; i < totalLinhas; i++) {
+            const item = componentes[i] || { bagNo: '', cor: '', tipo: '', qtdKg: '' };
+            const tr = document.createElement('tr');
+
+            if (i === 0) {
+                tr.innerHTML = `
+                    <td>${item.bagNo}</td>
+                    <td>${item.cor}</td>
+                    <td>${item.tipo}</td>
+                    <td>${item.qtdKg}</td>
+                    <td rowspan="${totalLinhas}" style="vertical-align: middle; font-weight: bold;">${cor}</td>
+                    <td rowspan="${totalLinhas}" style="vertical-align: middle; font-weight: bold;">${totalKg} KG</td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td>${item.bagNo}</td>
+                    <td>${item.cor}</td>
+                    <td>${item.tipo}</td>
+                    <td>${item.qtdKg}</td>
+                `;
+            }
+            printBody.appendChild(tr);
+        }
+
+        document.getElementById('checkSim').innerText = foiProducao === 'Sim' ? 'X' : '';
+        document.getElementById('checkNao').innerText = foiProducao === 'Não' ? 'X' : '';
+        document.getElementById('checkTatu10').innerText = caixa === 'Tatu 10' ? 'X' : '';
+        document.getElementById('checkTatu23').innerText = caixa === 'Tatu 23' ? 'X' : '';
+
+        const folhaFicha = document.getElementById('folhaFichaMistura');
+        folhaFicha.style.display = 'block';
+        folhaFicha.classList.add('imprimir-ativo');
+
+        setTimeout(() => {
+            window.print();
+            folhaFicha.classList.remove('imprimir-ativo');
+            folhaFicha.style.display = 'none';
+
+            alert("Ficha de Mistura salva e impressa com sucesso!");
             document.getElementById('formMistura').reset();
             
             document.getElementById('bodyBags').innerHTML = `
@@ -486,8 +683,8 @@
             `;
             document.getElementById('qtdFinalKg').value = '';
             buscarProximosSequenciais();
-        });
-    });
+        }, 500);
+    }
 </script>
 
 </body>
