@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Estoque - Caixas Tatu</title>
-    <!-- Biblioteca de QR Code -->
+    <!-- Biblioteca para geração de QR Code -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -35,10 +35,9 @@
         .btn-success { background-color: #16a34a; }
         .btn-secondary { background-color: #475569; }
 
-        /* Painel da Fila de Impressão */
         .painel-impressao { background: #e0f2fe; border: 1px solid #0284c7; border-radius: 8px; padding: 15px; margin-top: 20px; text-align: center; }
 
-        /* --- CONFIGURAÇÃO DA FOLHA A4 COM ETIQUETAS 7cm x 4cm --- */
+        /* CONFIGURAÇÃO DA FOLHA A4 PARA IMPRESSÃO DE ETIQUETAS 7x4 cm */
         #folhaA4 {
             display: none;
             width: 21cm;
@@ -51,8 +50,8 @@
 
         .grid-a4 {
             display: grid;
-            grid-template-columns: repeat(3, 7cm); /* 3 Colunas de 7cm */
-            grid-auto-rows: 4cm;                 /* Linhas de 4cm */
+            grid-template-columns: repeat(3, 7cm);
+            grid-auto-rows: 4cm;
             gap: 0.2cm;
             justify-content: center;
         }
@@ -75,14 +74,13 @@
         .etiqueta-info h3 { font-size: 11px; margin-bottom: 2px; border-bottom: 1px solid #000; text-align: center; }
         .qr-box { width: 36%; display: flex; justify-content: center; align-items: center; }
 
-        /* REGRAS DE IMPRESSÃO (Oculta tudo e mostra apenas a Folha A4) */
         @media print {
             @page { size: A4 portrait; margin: 0; }
             body { background: white; padding: 0; margin: 0; }
             body * { visibility: hidden; }
             #folhaA4, #folhaA4 * { visibility: visible; }
             #folhaA4 { position: absolute; left: 0; top: 0; width: 21cm; border: none; padding: 0.8cm 0.4cm; }
-            .etiqueta-box { border: 0.5px solid #ccc; } /* Linha bem fina para corte */
+            .etiqueta-box { border: 0.5px solid #ccc; }
         }
     </style>
 </head>
@@ -98,7 +96,7 @@
         <button class="tab-btn" onclick="switchTab('mistura')">2. Ficha de Mistura / Lote</button>
     </div>
 
-    <!-- ENTRADA -->
+    <!-- ABA 1: ENTRADA -->
     <div id="tab-entrada" class="tab-content active">
         <form id="formEntrada">
             <div class="form-grid">
@@ -162,7 +160,6 @@
             <button type="submit" class="btn">Lançar Entrada e Adicionar à Fila</button>
         </form>
 
-        <!-- PAINEL DE CONTROLE DA FILA DE IMPRESSÃO -->
         <div class="painel-impressao">
             <h3>🖨️ Fila de Impressão de Etiquetas (A4)</h3>
             <p>Etiquetas acumuladas: <b id="qtdFila">0</b> / <b>18</b></p>
@@ -171,15 +168,12 @@
             <button id="btnImprimirForcado" class="btn btn-secondary" style="display:none; margin-top:5px;" onclick="imprimirFolhaA4()">Imprimir Folha Incompleta Mesmo Assim</button>
         </div>
 
-        <!-- ÁREA DA FOLHA A4 PARA IMPRESSÃO -->
         <div id="folhaA4">
-            <div class="grid-a4" id="gridEtiquetaConteudo">
-                <!-- As etiquetas vão entrar aqui dinamicamente -->
-            </div>
+            <div class="grid-a4" id="gridEtiquetaConteudo"></div>
         </div>
     </div>
 
-    <!-- MISTURA -->
+    <!-- ABA 2: MISTURA -->
     <div id="tab-mistura" class="tab-content">
         <form id="formMistura">
             <div class="form-grid">
@@ -191,37 +185,40 @@
                 <div class="form-group"><label>Cor Final da Mistura</label><input type="text" id="corMistura" required placeholder="Ex: Preto"></div>
             </div>
 
-            <p><b>BAGs Utilizados (Escaneie o QR Code ou Digite):</b></p>
+            <p><b>BAGs Utilizados (Apenas BAGs disponíveis no estoque):</b></p>
             <table id="tabelaBags" style="width:100%; border-collapse:collapse; margin-bottom:10px;">
                 <thead>
                     <tr style="background:#f8fafc; font-size:12px;"><th>Nº BAG</th><th>QNTDD (KG)</th><th>Remover</th></tr>
                 </thead>
                 <tbody id="bodyBags">
                     <tr>
-                        <td><input type="text" name="bag_no[]" required style="width:100%"></td>
-                        <td><input type="number" step="0.01" name="bag_qtd[]" required style="width:100%"></td>
-                        <td><button type="button" onclick="this.parentNode.parentNode.remove()" style="color:red;">X</button></td>
+                        <td><input type="text" name="bag_no[]" list="listaBagsData" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
+                        <td><input type="number" step="0.01" name="bag_qtd[]" class="qtd-bag" oninput="calcularSomaTotal()" required style="width:100%" placeholder="0.00"></td>
+                        <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
                     </tr>
                 </tbody>
             </table>
+            
+            <!-- Lista auto-completar com BAGs ativos -->
+            <datalist id="listaBagsData"></datalist>
+
             <button type="button" class="btn btn-secondary" onclick="adicionarLinhaBag()">+ Adicionar Outro BAG</button>
 
             <div class="form-grid" style="margin-top:15px;">
                 <div class="form-group">
-                    <label>Qtd Total Gerada (KG)</label>
-                    <input type="number" step="0.01" id="qtdFinalKg" required>
+                    <label>Qtd Total Gerada (KG) - [Soma Automática]</label>
+                    <input type="number" step="0.01" id="qtdFinalKg" required placeholder="0.00" readonly style="background-color: #f8fafc; font-weight: bold; color: #1e3a8a;">
                 </div>
             </div>
 
-            <button type="submit" class="btn">Salvar Ficha de Mistura</button>
+            <button type="submit" class="btn">Salvar Ficha de Mistura e Dar Baixa</button>
         </form>
     </div>
 </div>
 
 <script>
     // ⚠️ SUBSTITUA COM A SUA URL DO APPS SCRIPT
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5iBRT_VQ2CLuIWB5Po24hzBhLTN9VVBX0cyAZfbn6P9S2aV98z9URfDcLEdEL9QY/exec";
-
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAIBpjOUi_OjcqRHlhhSB5lk8JwIWa5eJa0R29o8-CzBeyR4KUglzOwrQZpFANIQU/exec";
     let filaEtiquetas = [];
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -229,7 +226,6 @@
         document.getElementById('dataEntrada').value = dataHoje;
         document.getElementById('dataMistura').value = dataHoje;
 
-        // Verifica se abriu pelo QR Code
         const urlParams = new URLSearchParams(window.location.search);
         const bagUrl = urlParams.get('bag');
         if(bagUrl) {
@@ -246,11 +242,34 @@
         .then(data => {
             document.getElementById('bagNo').value = data.proximoBag;
             document.getElementById('noControle').value = data.proximoLote;
+            
+            // Atualiza o datalist apenas com BAGs SEM BAIXA
+            const datalist = document.getElementById('listaBagsData');
+            datalist.innerHTML = '';
+            if (data.listaBags) {
+                data.listaBags.forEach(bag => {
+                    const option = document.createElement('option');
+                    option.value = bag;
+                    datalist.appendChild(option);
+                });
+            }
         })
         .catch(err => {
             document.getElementById('bagNo').value = "BAG-0001";
             document.getElementById('noControle').value = "LOTE-1000";
         });
+    }
+
+    // CALCULA O TOTAL EM KG AUTOMATICAMENTE
+    function calcularSomaTotal() {
+        let total = 0;
+        document.querySelectorAll('.qtd-bag').forEach(input => {
+            const valor = parseFloat(input.value);
+            if (!isNaN(valor)) {
+                total += valor;
+            }
+        });
+        document.getElementById('qtdFinalKg').value = total.toFixed(2);
     }
 
     function toggleOutro(selectId, inputId) {
@@ -281,14 +300,19 @@
         const tbody = document.getElementById('bodyBags');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" name="bag_no[]" required style="width:100%"></td>
-            <td><input type="number" step="0.01" name="bag_qtd[]" required style="width:100%"></td>
-            <td><button type="button" onclick="this.parentNode.parentNode.remove()" style="color:red;">X</button></td>
+            <td><input type="text" name="bag_no[]" list="listaBagsData" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
+            <td><input type="number" step="0.01" name="bag_qtd[]" class="qtd-bag" oninput="calcularSomaTotal()" required style="width:100%" placeholder="0.00"></td>
+            <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
         `;
         tbody.appendChild(tr);
     }
 
-    // REGISTRO DE ENTRADA + FILA DE ETIQUETAS
+    function removerLinha(btn) {
+        btn.parentNode.parentNode.remove();
+        calcularSomaTotal();
+    }
+
+    // REGISTRO DE ENTRADA
     document.getElementById('formEntrada').addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -320,15 +344,10 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            // Adiciona a etiqueta na Fila
-            filaEtiquetas.push({
-                bagNo, cor, tipo, peso, maoDeObra, dataEntrada
-            });
-
+            filaEtiquetas.push({ bagNo, cor, tipo, peso, maoDeObra, dataEntrada });
             atualizarFilaImpressao();
             alert(`BAG ${bagNo} gravado! Fila atual: ${filaEtiquetas.length}/18 etiquetas.`);
             
-            // Limpa form e pega o próximo número
             document.getElementById('peso').value = '';
             document.getElementById('fornecedor').value = '';
             buscarProximosSequenciais();
@@ -339,22 +358,13 @@
         const qtd = filaEtiquetas.length;
         document.getElementById('qtdFila').innerText = qtd;
 
-        const btnImprimir = document.getElementById('btnImprimirA4');
-        const btnForcado = document.getElementById('btnImprimirForcado');
-
-        if (qtd > 0) {
-            btnForcado.style.display = 'inline-block';
-        }
-        if (qtd >= 18) {
-            btnImprimir.style.display = 'inline-block';
-            alert("A Folha A4 está cheia (18/18 etiquetas)! Pronta para impressão.");
-        }
+        if (qtd > 0) document.getElementById('btnImprimirForcado').style.display = 'inline-block';
+        if (qtd >= 18) document.getElementById('btnImprimirA4').style.display = 'inline-block';
     }
 
     function imprimirFolhaA4() {
         const grid = document.getElementById('gridEtiquetaConteudo');
-        grid.innerHTML = ''; // Limpa anterior
-
+        grid.innerHTML = '';
         const currentUrl = window.location.href.split('?')[0];
 
         filaEtiquetas.forEach((item, index) => {
@@ -375,7 +385,6 @@
             `;
             grid.appendChild(box);
 
-            // Gera o QR Code individual para cada etiqueta
             new QRCode(document.getElementById(idQr), {
                 text: `${currentUrl}?bag=${item.bagNo}`,
                 width: 65,
@@ -387,7 +396,6 @@
 
         setTimeout(() => {
             window.print();
-            // Limpa a fila após a impressão
             if (confirm("Deseja limpar a fila de etiquetas impressas?")) {
                 filaEtiquetas = [];
                 atualizarFilaImpressao();
@@ -398,7 +406,7 @@
         }, 500);
     }
 
-    // REGISTRO DE MISTURA
+    // REGISTRO DE MISTURA (COM BAIXA NO ESTOQUE)
     document.getElementById('formMistura').addEventListener('submit', function(e) {
         e.preventDefault();
         const bags = [];
@@ -423,8 +431,20 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            alert("Ficha de Mistura salva no Google Sheets!");
+            alert("Ficha de Mistura salva! Baixa dos BAGs realizada com sucesso.");
             document.getElementById('formMistura').reset();
+            
+            // Reseta a tabela para 1 linha
+            document.getElementById('bodyBags').innerHTML = `
+                <tr>
+                    <td><input type="text" name="bag_no[]" list="listaBagsData" required style="width:100%" placeholder="Clique ou digite o BAG..."></td>
+                    <td><input type="number" step="0.01" name="bag_qtd[]" class="qtd-bag" oninput="calcularSomaTotal()" required style="width:100%" placeholder="0.00"></td>
+                    <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
+                </tr>
+            `;
+            document.getElementById('qtdFinalKg').value = '';
+            
+            // Recarrega os números sequenciais e remove da lista os BAGs utilizados
             buscarProximosSequenciais();
         });
     });
