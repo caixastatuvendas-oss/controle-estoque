@@ -3,77 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Controle de Estoque e Misturas - Caixas Tatu</title>
+    <title>Sistema de Controle de Estoque - Caixas Tatu</title>
+    <!-- Lib para gerar QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --primary: #1e3a8a;
-            --primary-hover: #1e40af;
             --bg-color: #f1f5f9;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
             --border-color: #cbd5e1;
-            --accent: #0284c7;
-            --success: #16a34a;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 15px; }
-        .container { max-width: 1000px; margin: 0 auto; }
+        body { background-color: var(--bg-color); color: #0f172a; padding: 15px; }
+        .container { max-width: 900px; margin: 0 auto; }
 
-        header {
-            background-color: var(--primary);
-            color: white;
-            padding: 20px;
-            border-radius: 8px 8px 0 0;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        header h1 { font-size: 1.5rem; margin-bottom: 5px; }
-        header p { font-size: 0.85rem; opacity: 0.9; }
-
+        header { background-color: var(--primary); color: white; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; }
         .tabs { display: flex; background: #e2e8f0; border-bottom: 1px solid var(--border-color); }
-        .tab-btn {
-            flex: 1; padding: 12px; border: none; background: none;
-            font-size: 0.95rem; font-weight: 600; color: #475569; cursor: pointer; transition: all 0.3s ease;
-        }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; color: #475569; cursor: pointer; }
         .tab-btn.active { background: white; color: var(--primary); border-bottom: 3px solid var(--primary); }
 
         .tab-content { display: none; background: white; padding: 20px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .tab-content.active { display: block; }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
         .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #334155; }
-        .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 0.95rem; outline: none; }
-        .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2); }
+        .form-group label { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #334155; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 0.95rem; }
+        .form-group input[readonly] { background-color: #e2e8f0; cursor: not-allowed; }
 
-        .section-title { font-size: 1.05rem; color: var(--primary); border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 15px 0; }
+        .btn { background-color: var(--primary); color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-secondary { background-color: #475569; }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        table th, table td { border: 1px solid var(--border-color); padding: 8px; text-align: left; font-size: 0.85rem; }
-        table th { background-color: #f8fafc; color: #334155; }
-
-        .btn {
-            background-color: var(--primary); color: white; padding: 12px 20px;
-            border: none; border-radius: 5px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; transition: background 0.2s;
+        /* Estilo para a Etiqueta 4cm x 7cm */
+        #etiquetaArea { display: none; margin-top: 25px; text-align: center; }
+        .etiqueta-box {
+            width: 7cm;
+            height: 4cm;
+            border: 2px dashed #000;
+            padding: 5px;
+            margin: 0 auto;
+            background: white;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-border-box;
         }
-        .btn:hover { background-color: var(--primary-hover); }
-        .btn-add-row { background-color: #64748b; padding: 6px 12px; font-size: 0.85rem; width: auto; margin-bottom: 15px; }
+        .etiqueta-info { text-align: left; font-size: 10px; line-height: 1.2; font-weight: bold; }
+        .etiqueta-info h3 { font-size: 12px; margin-bottom: 3px; border-bottom: 1px solid #000; }
+        #qrcode { padding: 2px; }
 
-        .checkbox-group { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
-        .checkbox-group label { display: flex; align-items: center; gap: 5px; font-weight: normal; cursor: pointer; }
+        /* Regra de Impressão (Imprime apenas a etiqueta) */
+        @media print {
+            body * { visibility: hidden; }
+            #etiquetaArea, #etiquetaArea * { visibility: visible; }
+            #etiquetaArea { position: absolute; left: 0; top: 0; width: 7cm; height: 4cm; margin: 0; }
+            .btn-print { display: none; }
+        }
 
-        .toast { display: none; padding: 12px; margin-top: 15px; border-radius: 5px; text-align: center; font-weight: bold; }
-        .toast.success { background-color: #dcfce7; color: #15803d; }
-        .toast.error { background-color: #fee2e2; color: #b91c1c; }
+        .toast { display: none; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center; font-weight: bold; background: #dcfce7; color: #15803d; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Caixas Tatu - Hub de Estoque</h1>
-        <p>Lançamento de Matéria-Prima, Ficha de Mistura e Controle de Lote</p>
+        <h2>Caixas Tatu - Controle de Estoque</h2>
     </header>
 
     <div class="tabs">
@@ -81,74 +76,120 @@
         <button class="tab-btn" onclick="switchTab('mistura')">2. Ficha de Mistura / Lote</button>
     </div>
 
-    <!-- ABA 1: ENTRADA DE MATÉRIA-PRIMA -->
+    <!-- ENTRADA -->
     <div id="tab-entrada" class="tab-content active">
         <form id="formEntrada">
             <div class="form-grid">
-                <div class="form-group"><label for="bagNo">BAG Nº</label><input type="text" id="bagNo" required placeholder="Ex: BAG-001"></div>
-                <div class="form-group"><label for="dataEntrada">Data de Entrada</label><input type="date" id="dataEntrada" required></div>
-                <div class="form-group"><label for="cor">Cor</label><input type="text" id="cor" required placeholder="Ex: Preto, Azul..."></div>
-                <div class="form-group"><label for="tipo">Tipo</label><input type="text" id="tipo" required placeholder="Ex: PP, PEAD, Moído..."></div>
-                <div class="form-group"><label for="peso">Peso (KG)</label><input type="number" step="0.01" id="peso" required placeholder="0.00"></div>
-                <div class="form-group"><label for="maoDeObra">Mão de Obra</label><input type="text" id="maoDeObra" placeholder="Nome do responsável"></div>
-                <div class="form-group"><label for="fornecedor">Fornecedor</label><input type="text" id="fornecedor" required placeholder="Nome do fornecedor"></div>
+                <div class="form-group">
+                    <label>BAG Nº (Automático)</label>
+                    <input type="text" id="bagNo" readonly value="Carregando...">
+                </div>
+                <div class="form-group">
+                    <label>Data de Entrada</label>
+                    <input type="text" id="dataEntrada" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Cor</label>
+                    <select id="corSelect" onchange="toggleOutro('corSelect', 'corOutro')" required>
+                        <option value="">Selecione...</option>
+                        <option value="Amarelo">Amarelo</option>
+                        <option value="Azul">Azul</option>
+                        <option value="Branco Leitoso">Branco Leitoso</option>
+                        <option value="Cinza">Cinza</option>
+                        <option value="Laranja">Laranja</option>
+                        <option value="Lilás">Lilás</option>
+                        <option value="Natural">Natural</option>
+                        <option value="Preto">Preto</option>
+                        <option value="Rosa">Rosa</option>
+                        <option value="Roxo">Roxo</option>
+                        <option value="Verde">Verde</option>
+                        <option value="Verde Limão">Verde Limão</option>
+                        <option value="Vermelho">Vermelho</option>
+                        <option value="Virgem">Virgem</option>
+                        <option value="Outras">Outras...</option>
+                    </select>
+                    <input type="text" id="corOutro" placeholder="Digite a cor" style="display:none; margin-top:5px;">
+                </div>
+                <div class="form-group">
+                    <label>Matéria-Prima</label>
+                    <select id="tipoSelect" onchange="toggleOutro('tipoSelect', 'tipoOutro')" required>
+                        <option value="">Selecione...</option>
+                        <option value="Caixaria">Caixaria</option>
+                        <option value="Outra">Outra...</option>
+                    </select>
+                    <input type="text" id="tipoOutro" placeholder="Digite a matéria-prima" style="display:none; margin-top:5px;">
+                </div>
+                <div class="form-group">
+                    <label>Peso (KG)</label>
+                    <input type="number" step="0.01" id="peso" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label>Mão de Obra</label>
+                    <select id="maoDeObra" required>
+                        <option value="">Selecione...</option>
+                        <option value="Tatu">Tatu</option>
+                        <option value="Jesus">Jesus</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fornecedor</label>
+                    <input type="text" id="fornecedor" required placeholder="Nome do fornecedor">
+                </div>
             </div>
-            <button type="submit" class="btn">Lançar Entrada no Google Sheets</button>
+            <button type="submit" class="btn">Lançar e Gerar Etiqueta</button>
         </form>
+
+        <!-- ÁREA DA ETIQUETA 4x7 CM -->
+        <div id="etiquetaArea">
+            <div class="etiqueta-box" id="etiquetaConteudo">
+                <div class="etiqueta-info">
+                    <h3>CAIXAS TATU</h3>
+                    <p><b>BAG:</b> <span id="lblBag"></span></p>
+                    <p><b>DATA:</b> <span id="lblData"></span></p>
+                    <p><b>COR:</b> <span id="lblCor"></span></p>
+                    <p><b>TIPO:</b> <span id="lblTipo"></span></p>
+                    <p><b>PESO:</b> <span id="lblPeso"></span> KG</p>
+                    <p><b>OP:</b> <span id="lblOp"></span></p>
+                </div>
+                <div id="qrcode"></div>
+            </div>
+            <br>
+            <button class="btn btn-secondary btn-print" onclick="window.print()">🖨️ Imprimir Etiqueta (4x7 cm)</button>
+        </div>
     </div>
 
-    <!-- ABA 2: FICHA DE MISTURA E LOTE -->
+    <!-- MISTURA -->
     <div id="tab-mistura" class="tab-content">
         <form id="formMistura">
             <div class="form-grid">
-                <div class="form-group"><label for="noControle">Nº Controle / Lote</label><input type="text" id="noControle" required placeholder="Ex: 1970"></div>
-                <div class="form-group"><label for="dataMistura">Data da Mistura</label><input type="date" id="dataMistura" required></div>
-                <div class="form-group"><label for="corMistura">Cor Final da Mistura</label><input type="text" id="corMistura" required placeholder="Ex: Preto"></div>
+                <div class="form-group"><label>Nº Controle / Lote</label><input type="text" id="noControle" required placeholder="Ex: 1970"></div>
+                <div class="form-group"><label>Data da Mistura</label><input type="text" id="dataMistura" readonly></div>
+                <div class="form-group"><label>Cor Final da Mistura</label><input type="text" id="corMistura" required placeholder="Ex: Preto"></div>
             </div>
 
-            <div class="section-title">Matérias-Primas Utilizadas (BAGs)</div>
-            <table id="tabelaBags">
+            <p><b>BAGs Utilizados:</b></p>
+            <table id="tabelaBags" style="width:100%; border-collapse:collapse; margin-bottom:10px;">
                 <thead>
-                    <tr><th>Nº BAG</th><th>Cor</th><th>Tipo</th><th>QNTDD (KG)</th><th>Ação</th></tr>
+                    <tr style="background:#f8fafc; font-size:12px;"><th>Nº BAG</th><th>QNTDD (KG)</th><th>Remover</th></tr>
                 </thead>
                 <tbody id="bodyBags">
                     <tr>
                         <td><input type="text" name="bag_no[]" required style="width:100%"></td>
-                        <td><input type="text" name="bag_cor[]" style="width:100%"></td>
-                        <td><input type="text" name="bag_tipo[]" style="width:100%"></td>
                         <td><input type="number" step="0.01" name="bag_qtd[]" required style="width:100%"></td>
-                        <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer;">X</button></td>
+                        <td><button type="button" onclick="this.parentNode.parentNode.remove()" style="color:red;">X</button></td>
                     </tr>
                 </tbody>
             </table>
-            <button type="button" class="btn btn-add-row" onclick="adicionarLinhaBag()">+ Adicionar Outro BAG</button>
+            <button type="button" class="btn btn-secondary" onclick="adicionarLinhaBag()">+ Adicionar Outro BAG</button>
 
-            <div class="section-title">Mistura Final & Destino</div>
-            <div class="form-grid">
+            <div class="form-grid" style="margin-top:15px;">
                 <div class="form-group">
-                    <label for="qtdFinalKg">Quantidade Total Gerada da Mistura (KG)</label>
-                    <input type="number" step="0.01" id="qtdFinalKg" required placeholder="0.00">
+                    <label>Qtd Total Gerada (KG)</label>
+                    <input type="number" step="0.01" id="qtdFinalKg" required>
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 15px;">
-                <label>Mistura foi para produção?</label>
-                <div class="checkbox-group">
-                    <label><input type="radio" name="foiProducao" value="Sim" required> Sim</label>
-                    <label><input type="radio" name="foiProducao" value="Não"> Não</label>
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 15px;">
-                <label>Qual Caixa a ser produzida?</label>
-                <div class="checkbox-group">
-                    <label><input type="radio" name="caixaProduzida" value="Tatu 10"> Tatu 10</label>
-                    <label><input type="radio" name="caixaProduzida" value="Tatu 23"> Tatu 23</label>
-                    <label><input type="radio" name="caixaProduzida" value="Outra"> Outra</label>
-                </div>
-            </div>
-
-            <button type="submit" class="btn" style="margin-top:20px;">Salvar Ficha de Mistura no Google Sheets</button>
+            <button type="submit" class="btn">Salvar Ficha de Mistura</button>
         </form>
     </div>
 
@@ -156,15 +197,51 @@
 </div>
 
 <script>
-    // ⬇️ SUBST ITUIR O TEXTO ABAIXO PELA SUA URL DO GOOGLE APPS SCRIPT ⬇️
-    const APPS_SCRIPT_URL = "SUA_URL_DO_GOOGLE_APPS_SCRIPT_AQUI";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8iO_VEuNEa6K3lacZEIxEdV26vCbMyR9HbWS5cEq_zJhyQoATtULx5cP7JxyM2n4/exec";
 
-    document.getElementById('dataEntrada').valueAsDate = new Date();
-    document.getElementById('dataMistura').valueAsDate = new Date();
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", function() {
+        const dataHoje = new Date().toLocaleDateString('pt-BR');
+        document.getElementById('dataEntrada').value = dataHoje;
+        document.getElementById('dataMistura').value = dataHoje;
+        
+        // Verifica se veio algum BAG via QR Code na URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const bagUrl = urlParams.get('bag');
+        if(bagUrl) {
+            switchTab('mistura');
+            document.querySelector('input[name="bag_no[]"]').value = bagUrl;
+        }
+
+        buscarProximoBag();
+    });
+
+    function buscarProximoBag() {
+        fetch(APPS_SCRIPT_URL)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('bagNo').value = data.proximoBag;
+        })
+        .catch(err => {
+            document.getElementById('bagNo').value = "BAG-0001";
+        });
+    }
+
+    function toggleOutro(selectId, inputId) {
+        const select = document.getElementById(selectId);
+        const input = document.getElementById(inputId);
+        if (select.value === 'Outras' || select.value === 'Outra') {
+            input.style.display = 'block';
+            input.required = true;
+        } else {
+            input.style.display = 'none';
+            input.required = false;
+        }
+    }
 
     function switchTab(tab) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         if(tab === 'entrada') {
             document.querySelectorAll('.tab-btn')[0].classList.add('active');
             document.getElementById('tab-entrada').classList.add('active');
@@ -179,101 +256,100 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><input type="text" name="bag_no[]" required style="width:100%"></td>
-            <td><input type="text" name="bag_cor[]" style="width:100%"></td>
-            <td><input type="text" name="bag_tipo[]" style="width:100%"></td>
             <td><input type="number" step="0.01" name="bag_qtd[]" required style="width:100%"></td>
-            <td><button type="button" onclick="removerLinha(this)" style="color:red; background:none; border:none; cursor:pointer;">X</button></td>
+            <td><button type="button" onclick="this.parentNode.parentNode.remove()" style="color:red;">X</button></td>
         `;
         tbody.appendChild(tr);
     }
 
-    function removerLinha(btn) {
-        if (document.querySelectorAll('#bodyBags tr').length > 1) {
-            btn.parentNode.parentNode.remove();
-        } else {
-            alert('A tabela deve conter ao menos uma linha.');
-        }
-    }
-
-    function showToast(message, isSuccess = true) {
-        const toast = document.getElementById('toastMessage');
-        toast.innerText = message;
-        toast.className = 'toast ' + (isSuccess ? 'success' : 'error');
-        toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 4000);
-    }
-
+    // Processar formulário de Entrada + Gerar Etiqueta com QR Code
     document.getElementById('formEntrada').addEventListener('submit', function(e) {
         e.preventDefault();
+
+        const bagNo = document.getElementById('bagNo').value;
+        const corSelect = document.getElementById('corSelect').value;
+        const cor = corSelect === 'Outras' ? document.getElementById('corOutro').value : corSelect;
+        
+        const tipoSelect = document.getElementById('tipoSelect').value;
+        const tipo = tipoSelect === 'Outra' ? document.getElementById('tipoOutro').value : tipoSelect;
+
+        const peso = document.getElementById('peso').value;
+        const maoDeObra = document.getElementById('maoDeObra').value;
+        const fornecedor = document.getElementById('fornecedor').value;
+        const dataEntrada = document.getElementById('dataEntrada').value;
+
         const payload = {
             tipoAcao: 'ENTRADA_MATERIA_PRIMA',
-            bagNo: document.getElementById('bagNo').value,
-            dataEntrada: document.getElementById('dataEntrada').value,
-            cor: document.getElementById('cor').value,
-            tipo: document.getElementById('tipo').value,
-            peso: document.getElementById('peso').value,
-            maoDeObra: document.getElementById('maoDeObra').value,
-            fornecedor: document.getElementById('fornecedor').value
+            bagNo: bagNo,
+            cor: cor,
+            tipo: tipo,
+            peso: peso,
+            maoDeObra: maoDeObra,
+            fornecedor: fornecedor
         };
-
-        enviarDados(payload, () => {
-            document.getElementById('formEntrada').reset();
-            document.getElementById('dataEntrada').valueAsDate = new Date();
-        });
-    });
-
-    document.getElementById('formMistura').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const bags = [];
-        document.querySelectorAll('#bodyBags tr').forEach(row => {
-            const inputs = row.querySelectorAll('input');
-            bags.push({
-                bagNo: inputs[0].value,
-                cor: inputs[1].value,
-                tipo: inputs[2].value,
-                qtdKg: inputs[3].value
-            });
-        });
-
-        const payload = {
-            tipoAcao: 'FICHA_MISTURA',
-            noControle: document.getElementById('noControle').value,
-            dataMistura: document.getElementById('dataMistura').value,
-            corMistura: document.getElementById('corMistura').value,
-            qtdFinalKg: document.getElementById('qtdFinalKg').value,
-            foiProducao: document.querySelector('input[name="foiProducao"]:checked')?.value || '',
-            caixaProduzida: document.querySelector('input[name="caixaProduzida"]:checked')?.value || '',
-            componentes: bags
-        };
-
-        enviarDados(payload, () => {
-            document.getElementById('formMistura').reset();
-            document.getElementById('dataMistura').valueAsDate = new Date();
-        });
-    });
-
-    function enviarDados(payload, callback) {
-        if (APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbzDQrK4Uuu2hXUKm1jyQrsug3AByFNTw0YwZZwQUhPdZ4zrYyfyTT3_S9b6kbezR6E/exec" || APPS_SCRIPT_URL === "") {
-            showToast("Configure a URL do Apps Script no código do arquivo HTML!", false);
-            return;
-        }
 
         fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-        })
-        .then(() => {
-            showToast("Dados enviados com sucesso para a planilha!");
-            if(callback) callback();
-        })
-        .catch(err => {
-            console.error(err);
-            showToast("Erro ao enviar dados.", false);
+        }).then(() => {
+            // Atualiza campos da Etiqueta
+            document.getElementById('lblBag').innerText = bagNo;
+            document.getElementById('lblData').innerText = dataEntrada;
+            document.getElementById('lblCor').innerText = cor;
+            document.getElementById('lblTipo').innerText = tipo;
+            document.getElementById('lblPeso').innerText = peso;
+            document.getElementById('lblOp').innerText = maoDeObra;
+
+            // Gerar QR Code apontando para o próprio link com o parâmetro do BAG
+            document.getElementById('qrcode').innerHTML = "";
+            const currentUrl = window.location.href.split('?')[0];
+            const qrCodeUrl = `${currentUrl}?bag=${bagNo}`;
+
+            new QRCode(document.getElementById("qrcode"), {
+                text: qrCodeUrl,
+                width: 90,
+                height: 90
+            });
+
+            document.getElementById('etiquetaArea').style.display = 'block';
+            alert("Lançamento salvo com sucesso! Imprima a etiqueta abaixo.");
+            
+            // Recarrega o próximo número BAG para o próximo uso
+            buscarProximoBag();
         });
-    }
+    });
+
+    // Form Mistura
+    document.getElementById('formMistura').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const bags = [];
+        document.querySelectorAll('#bodyBags tr').forEach(row => {
+            const inputs = row.querySelectorAll('input');
+            if(inputs[0].value) {
+                bags.push({ bagNo: inputs[0].value, qtdKg: inputs[1].value });
+            }
+        });
+
+        const payload = {
+            tipoAcao: 'FICHA_MISTURA',
+            noControle: document.getElementById('noControle').value,
+            corMistura: document.getElementById('corMistura').value,
+            qtdFinalKg: document.getElementById('qtdFinalKg').value,
+            componentes: bags
+        };
+
+        fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            alert("Ficha de Mistura salva no Google Sheets!");
+            document.getElementById('formMistura').reset();
+        });
+    });
 </script>
 
 </body>
