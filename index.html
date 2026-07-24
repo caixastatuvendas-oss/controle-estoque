@@ -197,7 +197,7 @@
                 <div class="form-group"><label>Cor Final da Mistura</label><input type="text" id="corMistura" required placeholder="Ex: Preto"></div>
             </div>
 
-            <p><b>BAGs Utilizados (Apenas BAGs disponíveis no estoque):</b></p>
+            <p><b>BAGs Utilizados (Com Saldo Restante):</b></p>
             <table id="tabelaBags" style="width:100%; border-collapse:collapse; margin-bottom:10px;">
                 <thead>
                     <tr style="background:#f8fafc; font-size:12px;"><th>Nº BAG</th><th>QNTDD (KG) [Ajustável]</th><th>Remover</th></tr>
@@ -222,14 +222,14 @@
                 </div>
             </div>
 
-            <button type="submit" id="btnSalvarMistura" class="btn">Salvar Ficha de Mistura e Dar Baixa</button>
+            <button type="submit" id="btnSalvarMistura" class="btn">Salvar Ficha de Mistura</button>
         </form>
     </div>
 </div>
 
 <script>
-    // ⚠️ SUBSTITUA COM A SUA URL DO APPS SCRIPT
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzmrOgNnSm6zYK9Y6L8HQYGEpfJ2jyB8dGXRILgJE81qM893fdViJIjmTAi3g3SWg/exec";
+    // ⚠️ ATENÇÃO: SUBSTITUA COM A SUA URL DO GOOGLE APPS SCRIPT
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzulo3mmO9A_JS0R_zws7B8mX3kID-OI0sXfAJ5i2UFM84arxw6MOs4kA0baTYrZvU/exec";
     let filaEtiquetas = [];
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -250,10 +250,12 @@
         }
     });
 
-    // BUSCA AUTOMÁTICA DA QUANTIDADE AO DIGITAR/ESCONEAR O BAG
+    // BUSCA AUTOMÁTICA DO SALDO AO DIGITAR/ESCANEAR O BAG
     function buscarQuantidadeDoBag(inputBag) {
-        const codigoBag = inputBag.value.trim();
+        let codigoBag = inputBag.value.trim().split(' ')[0];
         if(!codigoBag) return;
+
+        inputBag.value = codigoBag;
 
         const row = inputBag.closest('tr');
         const inputQtd = row.querySelector('.qtd-bag');
@@ -263,19 +265,21 @@
         .then(data => {
             const alerta = document.getElementById('alertaBagJaBaixado');
 
-            if (data.baixado) {
+            if (data.zerado) {
                 alerta.style.display = 'block';
-                alerta.innerHTML = `⚠️ ATENÇÃO: O ${codigoBag} JÁ RECEBEU BAIXA EM ${data.dataBaixa}!<br>Este BAG não pode ser reutilizado.`;
+                alerta.innerHTML = `⚠️ ATENÇÃO: O ${codigoBag} JÁ FOI TOTALMENTE CONSUMIDO (SALDO 0 KG)!<br>Escolha outro BAG disponível.`;
                 document.getElementById('btnSalvarMistura').disabled = true;
                 document.getElementById('btnSalvarMistura').style.backgroundColor = '#94a3b8';
+                inputQtd.value = '';
             } else {
                 alerta.style.display = 'none';
                 document.getElementById('btnSalvarMistura').disabled = false;
                 document.getElementById('btnSalvarMistura').style.backgroundColor = '#1e3a8a';
 
-                if (data.encontrado && data.peso) {
-                    inputQtd.value = data.peso; // Preenche a quantidade automaticamente
-                    calcularSomaTotal();        // Atualiza a soma total em KG
+                if (data.encontrado && data.saldoAtual !== undefined) {
+                    inputQtd.value = data.saldoAtual;
+                    inputQtd.max = data.saldoAtual;
+                    calcularSomaTotal();
                 }
             }
         });
@@ -470,7 +474,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            alert("Ficha de Mistura salva! Baixa dos BAGs realizada com sucesso.");
+            alert("Ficha de Mistura salva com sucesso!");
             document.getElementById('formMistura').reset();
             
             document.getElementById('bodyBags').innerHTML = `
